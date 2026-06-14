@@ -100,3 +100,8 @@ INSERT INTO book (title, author, genre, isbn, price, quantity) VALUES
 ('Things Fall Apart', 'Chinua Achebe', 'Historical Fiction', '9780385474542', 210.00, 8),
 ('Midnight''s Children', 'Salman Rushdie', 'Magical Realism', '9780812976533', 270.00, 3),
 ('The Satanic Verses', 'Salman Rushdie', 'Magical Realism', '9780312270810', 410.00, 2);
+
+INSERT INTO users (username, password_hash, role) VALUES
+('admin', '{noop}password', 'ADMIN'),
+('manager', '{noop}password', 'MANAGER'),
+('clerk', '{noop}password', 'CLERK');

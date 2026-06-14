@@ -9,5 +9,17 @@ CREATE TABLE book (
     genre VARCHAR(100) NOT NULL,
     isbn VARCHAR(50) NOT NULL UNIQUE,
     price DECIMAL(10, 2) NOT NULL,
-    quantity INT NOT NULL
+    quantity INT NOT NULL,
+    `condition` VARCHAR(50)
+);
+
+-- Drop the table if it already exists
+DROP TABLE IF EXISTS users;
+
+-- Create users table
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL
 );
