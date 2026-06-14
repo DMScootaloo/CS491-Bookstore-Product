@@ -19,30 +19,68 @@ Welcome to the official repository for the Rare Finds Bookstore Management Syste
 3. Run the following command:
    ```bash
    mvn spring-boot:run
+   ```
 
 The API will be available at http://localhost:8080.
 
-🛠️ Tech Stack
-Backend: Spring Boot 3.2.5 (Java 21)
+## 🛠️ Tech Stack
+**Backend:** Spring Boot 3.2.5 (Java 21)
 
-Database: MySQL / Spring Data JPA
+**Database:** MySQL / Spring Data JPA
 
-Security: Spring Security (BCrypt)
+**Security:** Spring Security (BCrypt)
 
-Frontend: React (SPA)
+**Frontend:** React (SPA)
 
-📋 Project Status
-[x] Sprint 1: Database Schema, Authentication, RBAC, CRUD for Inventory.
+## 📋 Project Status
+- [x] Sprint 1: Database Schema, Authentication, RBAC, CRUD for Inventory, Search & Filter UI.
+- [ ] Sprint 2: Sales Processing, Reporting Dashboards, Supplier Management.
 
-[ ] Sprint 2: Sales Processing, Reporting Dashboards, Supplier Management.
+## 🤝 Team
+- **Frank Gialluca:** Product Owner
+- **Scott Fleenor:** Scrum Master
+- **James Hyatt:** Backend Developer
+- **Yves Michel Fouty-Bikandou:** Frontend Developer
+- **Luke Brown:** QA / Reporting
 
-🤝 Team
-Frank Gialluca: Product Owner
+---
 
-Scott Fleenor: Scrum Master
+## Sprint 1 Completion & Search Feature Walkthrough
 
-James Hyatt: Backend Developer
+I have successfully completed the tasks required to fulfill the Sprint 1 requirements (Authentication, RBAC, CRUD for Inventory) and set up the foundation for the frontend application. In addition, I have just completed the **Search & Filter (EP-03)** functionality assigned to Michel Fouty and James Hyatt.
 
-Yves Michel Fouty-Bikandou: Frontend Developer
+> [!NOTE]
+> The backend application is configured to run on the standard port `8080`.
+> The frontend application is a Vite + React application.
 
-Luke Brown: QA / Reporting
+### Backend Implementation
+* **Security & Authentication:** 
+  * Implemented `CustomUserDetailsService` with test passwords (`{noop}password`).
+  * Basic Authentication is required for all `/api/books/**` endpoints, with explicit role-based access control.
+  * CORS is globally configured to permit requests (including `OPTIONS` preflight) from the frontend.
+* **Database:** Seeded with sample books and test users (`admin`, `manager`, `clerk`) in an in-memory or dynamically updated database.
+* **Search Logic (T1-11, T1-12):**
+  * Added custom Spring Data JPA queries (`findByTitleContainingIgnoreCase`, `findByAuthor...`, etc.) to process case-insensitive keyword searches efficiently at the database level.
+  * Updated the main `getAllBooks` endpoint to dynamically accept optional `query` and `filterBy` request parameters and route them to the proper repository methods.
+
+### Frontend Implementation
+* **Design Guidelines:**
+  * Avoided Tailwind in favor of Vanilla CSS per the design specs.
+  * Built a rich, dark-mode aesthetic with vibrant purple accents, glassmorphism elements, and subtle micro-animations for interactive elements.
+* **Authentication UI:** Implemented a secure login screen that converts credentials into Base64 Basic Auth tokens.
+* **Dashboard & Search UI (T1-10, T1-13):**
+  * Built an intuitive search bar combined with a dropdown filter (`Title`, `Author`, `Genre`).
+  * Hitting "Enter" or clicking "Search" fires the updated API request.
+  * Added dynamic "No results found for '[query]'" messaging that gracefully handles empty result sets.
+  * Displays Role-based UI components (e.g., only Admin/Manager can see "Add New Book", only Admin can see "Delete").
+
+### Getting Started
+
+If your servers are not already running, you can launch them:
+1. **Backend:** Run `mvn spring-boot:run` in the `backend` folder.
+2. **Frontend:** Run `npm run dev` in the `frontend` folder.
+
+You can then log in using any of the test users:
+- `admin` / `password`
+- `manager` / `password`
+- `clerk` / `password`
