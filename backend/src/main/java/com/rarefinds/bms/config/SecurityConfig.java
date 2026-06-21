@@ -28,8 +28,9 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return org.springframework.security.crypto.factory.PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
+
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {

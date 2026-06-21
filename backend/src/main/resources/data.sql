@@ -101,7 +101,6 @@ INSERT INTO book (title, author, genre, isbn, price, quantity) VALUES
 ('Midnight''s Children', 'Salman Rushdie', 'Magical Realism', '9780812976533', 270.00, 3),
 ('The Satanic Verses', 'Salman Rushdie', 'Magical Realism', '9780312270810', 410.00, 2);
 
-INSERT INTO users (username, password_hash, role) VALUES
-('admin', '{noop}password', 'ADMIN'),
-('manager', '{noop}password', 'MANAGER'),
-('clerk', '{noop}password', 'CLERK');
+INSERT INTO users (username, password_hash, role) VALUES ('admin', '$2a$10$ICqpVhMHha4vInw3SjcRHOvY/Z5DTW1kY20kOdE9vyaWLKPpuDw.S', 'ADMIN');
+INSERT INTO users (username, password_hash, role) VALUES ('manager', '$2a$10$ICqpVhMHha4vInw3SjcRHOvY/Z5DTW1kY20kOdE9vyaWLKPpuDw.S', 'MANAGER');
+INSERT INTO users (username, password_hash, role) VALUES ('clerk', '$2a$10$ICqpVhMHha4vInw3SjcRHOvY/Z5DTW1kY20kOdE9vyaWLKPpuDw.S', 'CLERK');

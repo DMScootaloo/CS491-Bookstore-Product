@@ -15,7 +15,7 @@ const Dashboard = ({ user }) => {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const url = new URL('http://localhost:8080/api/books');
+      const url = new URL('http://localhost:8082/api/books');
       if (searchQuery) {
         url.searchParams.append('query', searchQuery);
         url.searchParams.append('filterBy', filterBy);

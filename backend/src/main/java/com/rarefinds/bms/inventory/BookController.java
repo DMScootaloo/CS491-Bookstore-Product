@@ -48,8 +48,11 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
+    public ResponseEntity<?> createBook(@RequestBody Book book) {
         try {
+            if (bookRepository.findByIsbn(book.getIsbn()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: ISBN already exists.");
+            }
             Book savedBook = bookRepository.save(book);
             return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -58,9 +61,13 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+    public ResponseEntity<?> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
         Optional<Book> optionalBook = bookRepository.findById(id);
         if (optionalBook.isPresent()) {
+            Optional<Book> existingWithIsbn = bookRepository.findByIsbn(bookDetails.getIsbn());
+            if (existingWithIsbn.isPresent() && !existingWithIsbn.get().getId().equals(id)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: ISBN already exists.");
+            }
             Book bookToUpdate = optionalBook.get();
             bookToUpdate.setTitle(bookDetails.getTitle());
             bookToUpdate.setAuthor(bookDetails.getAuthor());
