@@ -21,7 +21,7 @@ Welcome to the official repository for the Rare Finds Bookstore Management Syste
    mvn spring-boot:run
    ```
 
-The API will be available at http://localhost:8080.
+The API will be available at http://localhost:8081.
 
 ## 🛠️ Tech Stack
 **Backend:** Spring Boot 3.2.5 (Java 21)
@@ -50,12 +50,12 @@ The API will be available at http://localhost:8080.
 I have successfully completed the tasks required to fulfill the Sprint 1 requirements (Authentication, RBAC, CRUD for Inventory) and set up the foundation for the frontend application. In addition, I have just completed the **Search & Filter (EP-03)** functionality assigned to Michel Fouty and James Hyatt.
 
 > [!NOTE]
-> The backend application is configured to run on the standard port `8080`.
+> The backend application is configured to run on port `8081`.
 > The frontend application is a Vite + React application.
 
 ### Backend Implementation
 * **Security & Authentication:** 
-  * Implemented `CustomUserDetailsService` with test passwords (`{noop}password`).
+  * Implemented `CustomUserDetailsService` using `BCryptPasswordEncoder` with securely hashed passwords in the database.
   * Basic Authentication is required for all `/api/books/**` endpoints, with explicit role-based access control.
   * CORS is globally configured to permit requests (including `OPTIONS` preflight) from the frontend.
 * **Database:** Seeded with sample books and test users (`admin`, `manager`, `clerk`) in an in-memory or dynamically updated database.
