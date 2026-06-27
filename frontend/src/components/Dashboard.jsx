@@ -15,9 +15,58 @@ const Dashboard = ({ user }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBook, setEditingBook] = useState(null);
+  const [formData, setFormData] = useState({ title: '', author: '', genre: '', isbn: '', price: '', quantity: '', condition: '' });
+
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  const openAddModal = () => {
+    setEditingBook(null);
+    setFormData({ title: '', author: '', genre: '', isbn: '', price: '', quantity: '', condition: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (book) => {
+    setEditingBook(book);
+    setFormData(book);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveBook = async (e) => {
+    e.preventDefault();
+    try {
+      const isEdit = !!editingBook;
+      const endpoint = isEdit ? `http://localhost:8082/api/books/${editingBook.id}` : 'http://localhost:8082/api/books';
+      const method = isEdit ? 'PUT' : 'POST';
+      
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Authorization': `Basic ${user.basicAuth}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          price: parseFloat(formData.price),
+          quantity: parseInt(formData.quantity, 10)
+        })
+      });
+
+      if (response.ok) {
+        setIsModalOpen(false);
+        fetchBooks();
+      } else {
+        const errText = await response.text();
+        alert(`Failed to save book: ${errText}`);
+      }
+    } catch (err) {
+      alert('Connection error');
+    }
+  };
 
   // Debounced search for suggestions
   useEffect(() => {
@@ -163,7 +212,7 @@ const Dashboard = ({ user }) => {
         <h2>Inventory Dashboard</h2>
         <div style={{ display: 'flex', gap: '1rem' }}>
           {['ADMIN', 'MANAGER'].includes(user.role) && (
-            <button className="btn">Add New Book</button>
+            <button className="btn" onClick={openAddModal}>Add New Book</button>
           )}
           <button 
             className="btn btn-secondary" 
@@ -301,7 +350,9 @@ const Dashboard = ({ user }) => {
                 >
                   {book.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                 </button>
-                <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', marginRight: '0.5rem', fontSize: '0.875rem' }}>Edit</button>
+                {['ADMIN', 'MANAGER'].includes(user.role) && (
+                  <button className="btn btn-secondary" onClick={() => openEditModal(book)} style={{ padding: '0.25rem 0.5rem', marginRight: '0.5rem', fontSize: '0.875rem' }}>Edit</button>
+                )}
                 {['ADMIN'].includes(user.role) && (
                   <button className="btn btn-danger" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>Delete</button>
                 )}
@@ -365,6 +416,53 @@ const Dashboard = ({ user }) => {
           </button>
         </div>
       </div>
+
+      {/* Book Add/Edit Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>{editingBook ? 'Edit Book' : 'Add New Book'}</h3>
+            <form onSubmit={handleSaveBook}>
+              <div className="form-group">
+                <label>Title</label>
+                <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>Author</label>
+                <input required type="text" value={formData.author} onChange={e => setFormData({...formData, author: e.target.value})} />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Genre</label>
+                  <input required type="text" value={formData.genre} onChange={e => setFormData({...formData, genre: e.target.value})} />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>ISBN</label>
+                  <input required type="text" value={formData.isbn} onChange={e => setFormData({...formData, isbn: e.target.value})} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Price ($)</label>
+                  <input required type="number" step="0.01" min="0" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Quantity</label>
+                  <input required type="number" min="0" value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Condition</label>
+                  <input type="text" value={formData.condition} onChange={e => setFormData({...formData, condition: e.target.value})} />
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Save Book</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
