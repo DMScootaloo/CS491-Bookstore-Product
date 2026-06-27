@@ -1,5 +1,54 @@
 import React, { useState, useEffect } from 'react';
 
+const BookCover = ({ isbn, title }) => {
+  const [coverUrl, setCoverUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (!isbn) {
+      setLoading(false);
+      return;
+    }
+    
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
+      .then(res => res.json())
+      .then(data => {
+        if (isMounted) {
+          if (data.items && data.items.length > 0 && data.items[0].volumeInfo.imageLinks) {
+            let url = data.items[0].volumeInfo.imageLinks.thumbnail;
+            if (url) {
+              url = url.replace('http:', 'https:').replace('&edge=curl', '');
+            }
+            setCoverUrl(url);
+          }
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setLoading(false);
+      });
+      
+    return () => { isMounted = false; };
+  }, [isbn]);
+
+  if (loading) {
+    return <div className="book-cover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-hover)' }}>Loading...</div>;
+  }
+
+  if (!coverUrl) {
+    return (
+      <img 
+        src={`https://via.placeholder.com/280x400/1e293b/f8fafc?text=No+Cover`} 
+        alt={title} 
+        className="book-cover"
+      />
+    );
+  }
+
+  return <img src={coverUrl} alt={title} className="book-cover" />;
+};
+
 const Dashboard = ({ user }) => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -316,15 +365,7 @@ const Dashboard = ({ user }) => {
       <div className="books-grid">
         {books.map(book => (
           <div key={book.id} className="book-card">
-            <img 
-              src={`https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg`} 
-              alt={book.title} 
-              className="book-cover"
-              onError={(e) => {
-                e.target.onerror = null; 
-                e.target.src = 'https://via.placeholder.com/280x400/1e293b/f8fafc?text=No+Cover';
-              }}
-            />
+            <BookCover isbn={book.isbn} title={book.title} />
             <div className="book-info">
               <div className="book-title">{book.title}</div>
               <div className="book-author">by {book.author}</div>
