@@ -7,6 +7,8 @@ const Dashboard = ({ user }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBy, setFilterBy] = useState('title');
   const [hasSearched, setHasSearched] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Cart State
   const [cart, setCart] = useState([]);
@@ -17,12 +19,56 @@ const Dashboard = ({ user }) => {
     fetchBooks();
   }, []);
 
-  const fetchBooks = async () => {
+  // Debounced search for suggestions
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery) {
+        fetchSuggestions();
+      } else {
+        setSuggestions([]);
+        fetchBooks(); // Reset table when search is cleared
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, filterBy]);
+
+  const fetchSuggestions = async () => {
+    try {
+      const url = new URL('http://localhost:8082/api/books');
+      url.searchParams.append('query', searchQuery);
+      url.searchParams.append('filterBy', filterBy);
+      
+      const response = await fetch(url.toString(), {
+        headers: { 'Authorization': `Basic ${user.basicAuth}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Extract unique strings based on the filterBy criteria for suggestions
+        const uniqueSuggestions = Array.from(new Set(data.map(b => b[filterBy])));
+        setSuggestions(uniqueSuggestions.slice(0, 5)); // show top 5
+      }
+    } catch (err) {
+      console.error('Failed to fetch suggestions', err);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+    // The useEffect will trigger a search because searchQuery changed
+    // Wait for the next render to fetch the actual books for the table
+    setTimeout(() => {
+      fetchBooks(suggestion);
+    }, 0);
+  };
+
+  const fetchBooks = async (explicitQuery = searchQuery) => {
     try {
       setLoading(true);
-      const url = new URL('http://localhost:8081/api/books');
-      if (searchQuery) {
-        url.searchParams.append('query', searchQuery);
+      const url = new URL('http://localhost:8082/api/books');
+      if (explicitQuery) {
+        url.searchParams.append('query', explicitQuery);
         url.searchParams.append('filterBy', filterBy);
       }
       
@@ -34,7 +80,7 @@ const Dashboard = ({ user }) => {
       if (response.ok) {
         const data = await response.json();
         setBooks(data);
-        setHasSearched(!!searchQuery);
+        setHasSearched(!!explicitQuery);
       } else {
         setError('Failed to fetch books');
       }
@@ -79,7 +125,7 @@ const Dashboard = ({ user }) => {
         }))
       };
 
-      const response = await fetch('http://localhost:8081/api/sales', {
+      const response = await fetch('http://localhost:8082/api/sales', {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${user.basicAuth}`,
@@ -130,15 +176,60 @@ const Dashboard = ({ user }) => {
         </div>
       </div>
 
-      <div className="search-bar" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-        <input 
-          type="text" 
-          placeholder={`Search by ${filterBy}...`} 
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && fetchBooks()}
-          style={{ padding: '0.5rem', flex: 1, borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
-        />
+      <div className="search-bar" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', position: 'relative' }}>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <input 
+            type="text" 
+            placeholder={`Search by ${filterBy}...`} 
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setShowSuggestions(false);
+                fetchBooks();
+              }
+            }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <ul style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              background: 'var(--surface)',
+              border: '1px solid var(--border-color)',
+              borderTop: 'none',
+              borderRadius: '0 0 4px 4px',
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              zIndex: 10,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              {suggestions.map((suggestion, index) => (
+                <li 
+                  key={index} 
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  style={{
+                    padding: '0.75rem 1rem',
+                    cursor: 'pointer',
+                    borderBottom: index === suggestions.length - 1 ? 'none' : '1px solid rgba(51, 65, 85, 0.5)'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = 'var(--surface-hover)'}
+                  onMouseOut={(e) => e.target.style.background = 'transparent'}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <select 
           value={filterBy} 
           onChange={(e) => setFilterBy(e.target.value)}
@@ -148,7 +239,7 @@ const Dashboard = ({ user }) => {
           <option value="author">Author</option>
           <option value="genre">Genre</option>
         </select>
-        <button className="btn btn-primary" onClick={fetchBooks}>Search</button>
+        <button className="btn btn-primary" onClick={() => fetchBooks(searchQuery)}>Search</button>
       </div>
 
       <table className="data-table">
