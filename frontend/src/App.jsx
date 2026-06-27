@@ -59,10 +59,10 @@ function App() {
               src="/logo.png" 
               alt="Rare Finds Bookstore" 
               style={{ 
-                height: '40px', 
-                objectFit: 'contain', 
+                height: '60px', 
+                objectFit: 'cover', 
                 background: 'white', 
-                padding: '0.25rem 0.5rem', 
+                padding: '0', 
                 borderRadius: '4px' 
               }} 
             />

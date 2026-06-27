@@ -39,11 +39,14 @@ const Login = ({ onLogin }) => {
             src="/logo.png" 
             alt="Rare Finds Bookstore" 
             style={{ 
-              maxWidth: '200px', 
+              width: '100%', 
+              height: '140px',
               background: 'white', 
-              padding: '1rem', 
+              padding: '0',
               borderRadius: '8px',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              objectFit: 'cover',
+              objectPosition: 'center'
             }} 
           />
         </div>
