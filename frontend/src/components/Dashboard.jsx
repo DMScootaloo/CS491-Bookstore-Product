@@ -102,7 +102,7 @@ const BookCover = ({ isbn, title, author }) => {
           src={coverUrl || fallbackSvg} 
           alt={title} 
           className="book-cover"
-          style={{ flex: 1, objectFit: 'cover', height: '100%', borderBottom: '1px solid var(--border-color)' }}
+          style={{ flex: 1, objectFit: 'contain', width: '100%', height: '100%', borderBottom: '1px solid var(--border-color)', backgroundColor: '#0f172a' }}
         />
       )}
     </div>
