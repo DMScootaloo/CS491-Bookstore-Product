@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import ReactCardFlip from 'react-card-flip';
+import * as ReactCardFlipModule from 'react-card-flip';
+const ReactCardFlip = ReactCardFlipModule.default ? ReactCardFlipModule.default : ReactCardFlipModule;
 
 const BookCover = ({ isbn, title, author }) => {
   const [coverUrl, setCoverUrl] = useState(null);
@@ -65,39 +66,42 @@ const BookCover = ({ isbn, title, author }) => {
       onMouseLeave={() => setIsFlipped(false)}
     >
       <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
-        <div style={{ minHeight: '400px', display: 'flex' }}>
-          {loading ? (
-            <div className="book-cover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-hover)', flex: 1, height: '100%' }}>Loading...</div>
-          ) : (
-            <img 
-              src={coverUrl || fallbackSvg} 
-              alt={title} 
-              className="book-cover"
-              style={{ flex: 1, objectFit: 'cover', height: '100%', borderBottom: '1px solid var(--border-color)' }}
-            />
-          )}
-        </div>
-        <div 
-          style={{ 
-            minHeight: '400px', 
-            height: '400px',
-            overflowY: 'auto', 
-            backgroundColor: 'var(--surface-hover)',
-            padding: '1.5rem',
-            borderBottom: '1px solid var(--border-color)',
-            color: 'var(--text-primary)',
-            fontSize: '0.95rem',
-            lineHeight: '1.6'
-          }}
-          className="book-synopsis-back"
-        >
-          <h4 style={{marginTop: 0, marginBottom: '0.5rem', color: 'var(--primary)'}}>Synopsis</h4>
-          {synopsis ? (
-            <div dangerouslySetInnerHTML={{ __html: synopsis }} />
-          ) : (
-            <p style={{ color: 'var(--text-secondary)' }}>No synopsis available.</p>
-          )}
-        </div>
+        {[
+          <div key="front" style={{ minHeight: '400px', display: 'flex' }}>
+            {loading ? (
+              <div className="book-cover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-hover)', flex: 1, height: '100%' }}>Loading...</div>
+            ) : (
+              <img 
+                src={coverUrl || fallbackSvg} 
+                alt={title} 
+                className="book-cover"
+                style={{ flex: 1, objectFit: 'cover', height: '100%', borderBottom: '1px solid var(--border-color)' }}
+              />
+            )}
+          </div>,
+          <div 
+            key="back"
+            style={{ 
+              minHeight: '400px', 
+              height: '400px',
+              overflowY: 'auto', 
+              backgroundColor: 'var(--surface-hover)',
+              padding: '1.5rem',
+              borderBottom: '1px solid var(--border-color)',
+              color: 'var(--text-primary)',
+              fontSize: '0.95rem',
+              lineHeight: '1.6'
+            }}
+            className="book-synopsis-back"
+          >
+            <h4 style={{marginTop: 0, marginBottom: '0.5rem', color: 'var(--primary)'}}>Synopsis</h4>
+            {synopsis ? (
+              <div dangerouslySetInnerHTML={{ __html: synopsis }} />
+            ) : (
+              <p style={{ color: 'var(--text-secondary)' }}>No synopsis available.</p>
+            )}
+          </div>
+        ]}
       </ReactCardFlip>
     </div>
   );
