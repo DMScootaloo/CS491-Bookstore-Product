@@ -1,3 +1,7 @@
+-- Drop child tables first to avoid foreign key constraints
+DROP TABLE IF EXISTS sales_transaction_item;
+DROP TABLE IF EXISTS sales_transaction;
+
 -- Drop the table if it already exists to guarantee a clean build environment
 DROP TABLE IF EXISTS book;
 
